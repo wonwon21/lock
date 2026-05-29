@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>자물쇠를 열어라</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.wrap{width:100%;max-width:420px;min-height:100vh;background:#fff;display:flex;flex-direction:column;}
+.screen{display:none;flex-direction:column;}
+.screen.active{display:flex;}
+.nb{background:none;border:1px solid #d0d0cc;border-radius:8px;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:#333;transition:background 0.12s,transform 0.1s;}
+.nb:hover{background:#f5f5f0;}
+.nb:active{transform:scale(0.96);}
+.pb{background:#185FA5;border:none;border-radius:10px;padding:15px;font-size:16px;font-weight:500;cursor:pointer;color:#fff;width:100%;transition:background 0.12s,transform 0.1s;}
+.pb:hover{background:#0C447C;}
+.pb:active{transform:scale(0.97);}
+.nk{width:84px;height:84px;font-size:32px;font-weight:500;border:1px solid #d0d0cc;border-radius:14px;background:#fff;color:#222;cursor:pointer;transition:background 0.1s,transform 0.1s;}
+.nk:hover{background:#f5f5f0;}
+.nk:active{transform:scale(0.86);background:#E6F1FB;color:#0C447C;}
+.inp{width:100%;border:1px solid #d0d0cc;border-radius:8px;padding:10px 14px;font-size:15px;color:#222;background:#fff;}
+.inp:focus{outline:none;border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,0.15);}
+.slot{width:50px;height:62px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:500;transition:all 0.2s;border:1px solid #d0d0cc;background:#f5f5f0;color:#999;}
+.slot.filled{background:#E6F1FB;border-color:#378ADD;color:#0C447C;}
+.slot.active{border:2.5px solid #378ADD;background:#f5f5f0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 홈 -->
+<div id="home" class="screen active" style="padding:2.5rem 1.25rem;align-items:center;text-align:center;flex:1;justify-content:center;gap:1.2rem;">
+  <i class="ti ti-lock" style="font-size:56px;color:#378ADD;"></i>
+  <div>
+    <p style="font-size:24px;font-weight:600;color:#111;">자물쇠를 열어라</p>
+    <p style="font-size:14px;color:#888;margin-top:6px;">6자리 비밀번호를 맞혀보세요!</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+    <button class="pb" style="font-size:18px;padding:17px;" onclick="goTo('student');initSt()">
+      <i class="ti ti-keyhole"></i>  비밀번호 입력
+    </button>
+    <button class="nb" style="font-size:13px;color:#aaa;" onclick="goTo('admin-login')">
+      <i class="ti ti-settings" style="font-size:13px;"></i>  선생님 설정
+    </button>
+  </div>
+</div>
+
+<!-- 관리자 로그인 -->
+<div id="admin-login" class="screen" style="padding:2rem 1.25rem;gap:1rem;">
+  <button class="nb" style="align-self:flex-start;" onclick="goTo('home')"><i class="ti ti-arrow-left"></i> 뒤로</button>
+  <div style="background:#f5f5f0;border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
+    <p style="font-size:17px;font-weight:600;color:#111;">선생님 로그인</p>
+    <input id="apw" type="password" class="inp" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')tryAdmin()">
+    <p id="aerr" style="font-size:12px;color:#E24B4A;display:none;">비밀번호가 틀렸습니다.</p>
+    <button class="pb" onclick="tryAdmin()">입장</button>
+  </div>
+</div>
+
+<!-- 관리자 패널 -->
+<div id="admin-panel" class="screen" style="padding:1.5rem 1.25rem;gap:1rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <p style="font-size:18px;font-weight:600;color:#111;">비밀번호 설정</p>
+    <button class="nb" style="font-size:12px;color:#A32D2D;border-color:#F09595;" onclick="goTo('home')">종료</button>
+  </div>
+  <div style="background:#fff;border:1px solid #e0e0da;border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;gap:14px;">
+    <p style="font-size:13px;color:#888;">이 태블릿의 6자리 비밀번호를 설정하세요</p>
+    <div style="display:flex;gap:8px;">
+      <input type="number" min="0" max="9" id="d0" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,1)">
+      <input type="number" min="0" max="9" id="d1" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,2)">
+      <input type="number" min="0" max="9" id="d2" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,3)">
+      <input type="number" min="0" max="9" id="d3" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,4)">
+      <input type="number" min="0" max="9" id="d4" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,5)">
+      <input type="number" min="0" max="9" id="d5" class="inp" style="text-align:center;font-size:24px;font-weight:600;padding:10px 0;" oninput="cap(this,-1)">
+    </div>
+    <button class="pb" onclick="saveSecret()"><i class="ti ti-device-floppy"></i>  저장하기</button>
+    <p id="smsg" style="font-size:13px;color:#3B6D11;text-align:center;display:none;">저장 완료! 학생에게 태블릿을 나눠주세요.</p>
+  </div>
+</div>
+
+<!-- 학생 입력 -->
+<div id="student" class="screen" style="padding:1.5rem 1.25rem;gap:1rem;align-items:center;flex:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+    <button class="nb" onclick="goTo('home')"><i class="ti ti-home"></i></button>
+    <p style="font-size:16px;font-weight:600;color:#111;">비밀번호를 맞혀봐요</p>
+    <div style="width:44px;"></div>
+  </div>
+  <i class="ti ti-lock" style="font-size:44px;color:#378ADD;margin-top:0.5rem;"></i>
+  <div style="display:flex;gap:7px;" id="slots"></div>
+  <p style="font-size:14px;color:#888;" id="st-hint">1번째 자리를 입력하세요</p>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:0.5rem;">
+    <button class="nk" onclick="inp(7)">7</button>
+    <button class="nk" onclick="inp(8)">8</button>
+    <button class="nk" onclick="inp(9)">9</button>
+    <button class="nk" onclick="inp(4)">4</button>
+    <button class="nk" onclick="inp(5)">5</button>
+    <button class="nk" onclick="inp(6)">6</button>
+    <button class="nk" onclick="inp(1)">1</button>
+    <button class="nk" onclick="inp(2)">2</button>
+    <button class="nk" onclick="inp(3)">3</button>
+    <button class="nk" style="background:#f5f5f0;" onclick="del()"><i class="ti ti-backspace"></i></button>
+    <button class="nk" onclick="inp(0)">0</button>
+    <button class="nk" style="background:#185FA5;color:#fff;" onclick="submit()"><i class="ti ti-check"></i></button>
+  </div>
+</div>
+
+<!-- 성공 -->
+<div id="success" class="screen" style="padding:3rem 1.25rem;align-items:center;text-align:center;flex:1;justify-content:center;gap:1.2rem;">
+  <i class="ti ti-lock-open" style="font-size:72px;color:#3B6D11;"></i>
+  <div>
+    <p style="font-size:24px;font-weight:600;color:#111;">자물쇠가 열렸다!</p>
+    <p style="font-size:14px;color:#888;margin-top:6px;">정답 비밀번호</p>
+    <p style="font-size:38px;font-weight:700;letter-spacing:10px;color:#185FA5;margin-top:10px;" id="final-code"></p>
+  </div>
+  <button class="pb" style="max-width:220px;" onclick="resetSt()">다시 도전</button>
+</div>
+
+<!-- 실패 -->
+<div id="fail" class="screen" style="padding:3rem 1.25rem;align-items:center;text-align:center;flex:1;justify-content:center;gap:1.2rem;">
+  <i class="ti ti-lock" style="font-size:72px;color:#A32D2D;"></i>
+  <div>
+    <p style="font-size:22px;font-weight:600;color:#111;">틀렸어요!</p>
+    <p style="font-size:14px;color:#888;margin-top:6px;">다시 생각해보세요.</p>
+  </div>
+  <button class="pb" style="max-width:220px;" onclick="resetSt()">다시 입력</button>
+</div>
+
+</div>
+<script>
+const ADMIN_PW = '2604';
+const SK = 'lock_secret_v4';
+let entered = [], curSlot = 0;
+
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function tryAdmin(){
+  const v = document.getElementById('apw').value;
+  const err = document.getElementById('aerr');
+  if(v === ADMIN_PW){
+    document.getElementById('apw').value = '';
+    err.style.display = 'none';
+    loadAdmin();
+    goTo('admin-panel');
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function loadAdmin(){
+  let s = '000000';
+  try{ s = localStorage.getItem(SK) || '000000'; }catch(e){}
+  for(let i=0;i<6;i++){
+    const el = document.getElementById('d'+i);
+    if(el) el.value = s[i] || '0';
+  }
+  document.getElementById('smsg').style.display = 'none';
+}
+
+function cap(el, nextIdx){
+  if(el.value.length > 1) el.value = el.value.slice(-1);
+  if(nextIdx >= 0 && nextIdx <= 5 && el.value !== ''){
+    document.getElementById('d'+nextIdx).focus();
+  }
+}
+
+function saveSecret(){
+  let s = '';
+  for(let i=0;i<6;i++){
+    const v = document.getElementById('d'+i).value;
+    s += (v === '' ? '0' : v.slice(-1));
+  }
+  try{ localStorage.setItem(SK, s); }catch(e){}
+  document.getElementById('smsg').style.display = 'block';
+}
+
+function initSt(){
+  entered = [];
+  curSlot = 0;
+  renderSlots();
+}
+
+function renderSlots(){
+  const cont = document.getElementById('slots');
+  cont.innerHTML = '';
+  for(let i=0;i<6;i++){
+    const d = document.createElement('div');
+    let cls = 'slot';
+    if(entered[i] !== undefined) cls += ' filled';
+    else if(i === curSlot) cls += ' active';
+    d.className = cls;
+    d.textContent = entered[i] !== undefined ? entered[i] : (i === curSlot ? '_' : '·');
+    cont.appendChild(d);
+  }
+  const hint = document.getElementById('st-hint');
+  hint.textContent = curSlot < 6 ? `${curSlot+1}번째 자리를 입력하세요` : '✓ 버튼으로 확인하세요';
+}
+
+function inp(n){
+  if(curSlot >= 6) return;
+  entered[curSlot] = n;
+  curSlot++;
+  renderSlots();
+}
+
+function del(){
+  if(curSlot <= 0) return;
+  curSlot--;
+  entered.splice(curSlot, 1);
+  renderSlots();
+}
+
+function submit(){
+  if(entered.length < 6){
+    document.getElementById('st-hint').textContent = '6자리를 모두 입력해주세요!';
+    return;
+  }
+  const code = entered.join('');
+  let secret = '000000';
+  try{ secret = localStorage.getItem(SK) || '000000'; }catch(e){}
+  document.getElementById('final-code').textContent = code;
+  if(code === secret){ goTo('success'); }
+  else { goTo('fail'); }
+}
+
+function resetSt(){
+  entered = [];
+  curSlot = 0;
+  renderSlots();
+  goTo('student');
+}
+</script>
+</body>
+</html>
